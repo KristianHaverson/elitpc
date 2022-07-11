@@ -41,7 +41,7 @@ TH1D* proj(TH2D *Hist, int option){
 std::tuple<double,double,double> trackProjInfo(TH1D *clone,
 		double ImageSD,
 		double ImageFWXM
-			){
+		){
 	double length;
 	double Intensity;
 	double iMin_centre;
@@ -89,7 +89,7 @@ std::tuple<double,double,double> trackProjInfo(TH1D *clone,
 
 	//	length = length - ImageFWXM*ImageSD;
 
-//cout<<X_Min<<" "<<X_Max<<endl;
+	//cout<<X_Min<<" "<<X_Max<<endl;
 	//double X_D2[2]={X_Min,X_Max};
 	//double Y_D2[2]={0.1,0.1};
 	//	XLimProj[0] = X_Min-30;  
@@ -102,17 +102,17 @@ std::tuple<double,double,double> trackProjInfo(TH1D *clone,
 }  
 
 /*
-std::tuple<TGraph,double,double>TGraph projEndpoints(xMin,XMax){
-	double X[2]={X_Min,X_Max};
-	double Y[2]={0.1,0.1};
-	XLimProj[0] = X_Min-30;  
-	XLimProj[1] = X_Max+30;  
-	EndpointsXProj = new TGraph(2,X_D2,Y_D2);
+	 std::tuple<TGraph,double,double>TGraph projEndpoints(xMin,XMax){
+	 double X[2]={X_Min,X_Max};
+	 double Y[2]={0.1,0.1};
+	 XLimProj[0] = X_Min-30;  
+	 XLimProj[1] = X_Max+30;  
+	 EndpointsXProj = new TGraph(2,X_D2,Y_D2);
 
 
 
-}
-*/
+	 }
+	 */
 
 void centerPixel(){
 

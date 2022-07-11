@@ -1,7 +1,18 @@
 #ifndef draw_hpp
 #define draw_hpp
 
+
 #include <stdio.h>
+
+
+
+void processImg(TCanvas *c){
+
+	c->Modified();
+	c->Update();
+	gSystem->ProcessEvents();
+
+}
 void drawX(TCanvas *c,int dir,const char *title ,TH1D *Hist,TGraph *end){
 	
 
@@ -65,20 +76,82 @@ void draw( TH2D *Hist,TCanvas *c, int dir,TGraph *X, TGraph *Y){
 if(ax2-ax1>11){Hist->GetXaxis()->SetRangeUser(ax1-30,ax2+30);}else {Hist->GetXaxis()->SetRangeUser(ax1-120,ax2+120);}
 
 if(ay2-ay1>11){Hist->GetYaxis()->SetRangeUser(ay1-30,ay2+30);}else{Hist->GetYaxis()->SetRangeUser(ay1-120,ay2+120);}
+
 }
+
+
+
+void draw( TH2D *Hist,TCanvas *c, int dir,TGraph *X, TGraph *Y,TF1 func){
+	c->cd(dir);
+	Hist->Draw("colz2 1");
+	Hist->SetStats(0);
+	double ax1, ax2, ay1, ay2;
+	double bx1, bx2, by1, by2;
+	X->GetPoint(0,ax1,bx1); 
+	X->GetPoint(1,ax2,bx2); 
+	Y->GetPoint(0,ay1,by1); 
+	Y->GetPoint(1,ay2,by2); 
+if(ax2-ax1>11){Hist->GetXaxis()->SetRangeUser(ax1-30,ax2+30);}else {Hist->GetXaxis()->SetRangeUser(ax1-120,ax2+120);}
+
+if(ay2-ay1>11){Hist->GetYaxis()->SetRangeUser(ay1-30,ay2+30);}else{Hist->GetYaxis()->SetRangeUser(ay1-120,ay2+120);}
+
+
+	func.Draw("SAME");
+
+	processImg(c);
+
+}
+
+
+
+
+/*
+void draw( TH2D *Hist,TCanvas *c, int dir,TGraph *X, TGraph *Y){
+	c->cd(dir);
+	Hist->Draw("colz2 1");
+	Hist->SetStats(0);
+	double ax1, ax2, ay1, ay2;
+	double bx1, bx2, by1, by2;
+	X->GetPoint(0,ax1,bx1); 
+	X->GetPoint(1,ax2,bx2); 
+	Y->GetPoint(0,ay1,by1); 
+	Y->GetPoint(1,ay2,by2); 
+if(ax2-ax1>11){Hist->GetXaxis()->SetRangeUser(ax1-30,ax2+30);}else {Hist->GetXaxis()->SetRangeUser(ax1-120,ax2+120);}
+
+if(ay2-ay1>11){Hist->GetYaxis()->SetRangeUser(ay1-30,ay2+30);}else{Hist->GetYaxis()->SetRangeUser(ay1-120,ay2+120);}
+
+
+
+
+}*/
+
+
+
+void ransacDraw(TCanvas *c, TF1 lU, TF1 lV, TF1 lW){
+
+c->cd(1);
+lU.Draw("SAME");
+
+c->cd(2);
+lV.Draw("SAME");
+
+c->cd(3);
+lW.Draw("SAME");
+
+processImg(c);
+
+}
+
+
+
+
 
 void draw( TH2D *Hist,TCanvas *c, int dir){
 	c->cd(dir);
 	Hist->Draw("colz2 1");
 	Hist->SetStats(0);
 }
-void processImg(TCanvas *c){
 
-	c->Modified();
-	c->Update();
-	gSystem->ProcessEvents();
-
-}
 #endif /* ReadTreeH_hpp */
 
 

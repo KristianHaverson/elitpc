@@ -13,7 +13,7 @@ void TH2Viewer(){
 	/////////////////////////////////////////////////////////////////////////////
 	// ** Switches ** //
 	bool view_mm = true;
-	bool view_time = false;
+	bool view_time = true;
 
 	bool analysis_mm = true;
 	bool analysis_time = false;
@@ -52,12 +52,12 @@ void TH2Viewer(){
 
 	/////////////////////////////////////////////////////////////////////////////
 	// ** main loop** //
-	for(int evt =1 ;evt<nEntries;evt++){
+	for(int evt =2 ;evt<nEntries;evt++){
 
 
 
 
-		
+
 		///////////////////////////////////////////////////////////////////////////
 		// ** Fetch TH2s - Time** //
 		if(view_time == true){
@@ -103,7 +103,7 @@ void TH2Viewer(){
 
 		if(view_time == true){
 
-			
+
 			c1 = new TCanvas("c1","ELITPC Tracks: Raw Strips Vs Time",1400,410);
 			c1->Divide(3,1);
 			c1->SetWindowPosition(1,1);
@@ -154,20 +154,20 @@ void TH2Viewer(){
 			std::tuple<double,double,double> lenUX, lenUY, lenVX, lenVY, lenWX, lenWY;
 			double length, xMin, XMax;
 			double Y[2]={0.1,0.1};
-	
-			
+
+
 
 			// ** projections - mm ** //
 			if(projSwitch_mm==true){
-				c21 = new TCanvas("c21","mm U proj",450,550);
-				c22 = new TCanvas("c22","mm V proj",450,550);
-				c23 = new TCanvas("c23","mm W proj",450,550);
-				c21->SetWindowPosition(1,480);
-				c22->SetWindowPosition(550,480);
-				c23->SetWindowPosition(1030,480);
-				c21->Divide(1,2);
-				c22->Divide(1,2);
-				c23->Divide(1,2);
+				c21 = new TCanvas("c21","mm U proj",470,1000);
+				c22 = new TCanvas("c22","mm V proj",470,1000);
+				c23 = new TCanvas("c23","mm W proj",470,1000);
+				c21->SetWindowPosition(1,1);
+				c22->SetWindowPosition(550,1);
+				c23->SetWindowPosition(1030,1);
+				c21->Divide(1,3);
+				c22->Divide(1,3);
+				c23->Divide(1,3);
 
 
 
@@ -178,14 +178,14 @@ void TH2Viewer(){
 				length = get<0>(lenUX); cout<<"Len U xproj = "<<length<<" mm"<<endl;
 				double X1[2]={get<1>(lenUX),get<2>(lenUX)};
 				endpointsProj1 = new TGraph(2,X1,Y);
-				drawX(c21,1,title,UXmm,endpointsProj1); 
+				drawX(c21,2,title,UXmm,endpointsProj1); 
 				//y
 				UYmm	= proj(UHist_mm,1); title = "Strip U Y Proj" ;
 				lenUY = 	trackProjInfo(UYmm,1,1); 
 				length = get<0>(lenUY); cout<<"Len U yproj = "<<length<<" mm"<<endl<<endl;
 				double X2[2]={get<1>(lenUY),get<2>(lenUY)};
 				endpointsProj2 = new TGraph(2,X2,Y);
-				drawY(c21,2,title,UYmm,endpointsProj2);
+				drawY(c21,3,title,UYmm,endpointsProj2);
 
 				// ** V Strips** //
 				// x
@@ -194,14 +194,14 @@ void TH2Viewer(){
 				length = get<0>(lenVX); cout<<"Len V Xproj = "<<length<<" mm"<<endl;
 				double X3[2]={get<1>(lenVX),get<2>(lenVX)};
 				endpointsProj3 = new TGraph(2,X3,Y);
-				drawX(c22,1,title,VXmm,endpointsProj3);
+				drawX(c22,2,title,VXmm,endpointsProj3);
 				//y
 				VYmm	= proj(VHist_mm,1); title = "Strip V Y Proj" ;
 				lenVY = 	trackProjInfo(VYmm,1,1);
 				length = get<0>(lenVY); cout<<"Len V Yproj = "<<length<<" mm"<<endl<<endl;
 				double X4[2]={get<1>(lenVY),get<2>(lenVY)};
 				endpointsProj4 = new TGraph(2,X4,Y);
-				drawY(c22,2,title,VYmm,endpointsProj4);
+				drawY(c22,3,title,VYmm,endpointsProj4);
 
 				// ** W Strips ** //
 				// x
@@ -210,16 +210,14 @@ void TH2Viewer(){
 				length = get<0>(lenWX); cout<<"Len W Xproj = "<<length<< " mm"<<endl;
 				double X5[2]={get<1>(lenWX),get<2>(lenWX)};
 				endpointsProj5 = new TGraph(2,X5,Y);
-				drawX(c23,1,title,WXmm,endpointsProj5);
+				drawX(c23,2,title,WXmm,endpointsProj5);
 				//x
 				WYmm	= proj(WHist_mm,1); title = "Strip W Y Proj" ;
 				lenWY = 	trackProjInfo(WYmm,1,1);
 				length = get<0>(lenWY); cout<<"Len W YProj = "<<length<<" mm"<<endl<<endl;
 				double X6[2]={get<1>(lenWY),get<2>(lenWY)};
 				endpointsProj6 = new TGraph(2,X6,Y);
-				drawY(c23,2,title,WYmm,endpointsProj6);
-
-
+				drawY(c23,3,title,WYmm,endpointsProj6);
 
 
 
@@ -227,15 +225,32 @@ void TH2Viewer(){
 				processImg(c22);
 				processImg(c23);
 			}
-			
+
+			// ** RANSAC ** //
+			int sampSize=40;
+			int itter=1000;
+			double thresh=40;
+
+			//TF1 lineU = Ransac(UHist_mm,sampSize,itter,thresh);
+			//TF1 lineV = Ransac(UHist_mm,sampSize,itter,thresh);
+			//TF1 lineW = Ransac(UHist_mm,sampSize,itter,thresh);
+
 			// ** Plotting main** //
-			c2 = new TCanvas("c2","ELITPC Tracks: Raw Strips Vs mm",1400,410);
-			c2->Divide(3,1);
-			c2->SetWindowPosition(1,1);
-			draw(UHist_mm,c2,1,endpointsProj1,endpointsProj2);
-			draw(VHist_mm,c2,2,endpointsProj3,endpointsProj4);
-			draw(WHist_mm,c2,3,endpointsProj5,endpointsProj6);
-			processImg(c2);
+			//c2a = new TCanvas("c2a","ELITPC Tracks: U Raw Strips Vs mm",450,450);
+			//c2b = new TCanvas("c2b","ELITPC Tracks: V Raw Strips Vs mm",450,450);
+			//c2c = new TCanvas("c2c","ELITPC Tracks: W Raw Strips Vs mm",450,450);
+			//c2->Divide(3,1);
+			//c2a->SetWindowPosition(1,1);
+			//c2a->SetWindowPosition(600,1);
+			//c2a->SetWindowPosition(1130,1);
+			draw(UHist_mm,c21,1,endpointsProj1,endpointsProj2);
+			processImg(c21);
+			draw(VHist_mm,c22,1,endpointsProj3,endpointsProj4);
+			processImg(c22);
+			draw(WHist_mm,c23,1,endpointsProj5,endpointsProj6);
+			processImg(c23);
+			//ransacDraw(c2,lineU,lineV,lineW);
+
 
 
 		}
@@ -253,7 +268,9 @@ void TH2Viewer(){
 		///////////////////////////////////////////////////////////////////////////
 		// ** Clean up pointers! ** //
 		if(c1)delete c1;
-		if(c2)delete c2;
+		if(c2a)delete c2a;
+		if(c2b)delete c2b;
+		if(c2c)delete c2c;				
 		if(c11)delete c11;
 		if(c12)delete c12;
 		if(c13)delete c13;
