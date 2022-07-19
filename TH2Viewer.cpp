@@ -7,252 +7,201 @@
 using namespace std;
 
 
+// --- Define pretty colo(u)rs --- //
+#define RESET   "\033[0m"
+#define BLACK   "\033[30m"    /* Black */
+#define RED     "\033[31m"    /* Red */
+#define GREEN   "\033[32m"    /* Green */
+#define YELLOW  "\033[33m"    /* Yellow */
+#define BLUE    "\033[34m"    /* Blue */
+#define MAGENTA "\033[35m"    /* Magenta */
+#define CYAN    "\033[36m"    /* Cyan */
+#define WHITE   "\033[37m"    /* White */
+#define BOLDBLACK   "\033[1m\033[30m"       /* Bold Black */
+#define BOLDRED     "\033[1m\033[31m"       /* Bold Red */
+#define BOLDGREEN   "\033[1m\033[32m"       /* Bold Green */
+#define BOLDYELLOW  "\033[1m\033[33m"       /* Bold Yellow */
+#define BOLDBLUE    "\033[1m\033[34m"       /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[35m"       /* Bold Magenta */
+#define BOLDCYAN    "\033[1m\033[36m"       /* Bold Cyan */
+#define BOLDWHITE   "\033[1m\033[37m"       /* Bold White */
 
-void TH2Viewer(){
+
+
+int TH2Viewer(){
+
 
 	/////////////////////////////////////////////////////////////////////////////
 	// ** Switches ** //
-	bool view_mm = true;
-	bool view_time = true;
 
-	bool analysis_mm = true;
-	bool analysis_time = false;
+	int TimeOrMm = 1;  // 0 = time, 1 = mm 
+	string inputDirecTime ="/home/kris/Desktop/TrackTreeTime.root";
+	string inputDirecMm  ="/home/kris/Desktop/TrackTree_2022-04-12T08:03:44.531_0000.root";
+	int nEntries = 2674; // <---- check this
+	bool Thresh = true;
+	bool Projswitch = true;
 
-	bool projSwitch_mm = true;
-	bool projSwitch_time = false;
 
 
 	/////////////////////////////////////////////////////////////////////////////
 	// ** Variables ** //
 	char stepfwd;
-	int nEntries = 2674;
-	string U_Time, V_Time, W_Time; 
-	string U_mm, V_mm, W_mm; 
-	string inputTree1, inputTree2;
-	TFile *f1, *f2;
+	string U, V, W ;
 	const char *title;
+	string HistTitle;
 	gStyle->SetPalette(kRainBow);  // Randbow colour for 2D Hist
-
+	TH2D *UHist;
+	TH2D *VHist;
+	TH2D *WHist;
+	int xSize;
+	int ySize;
+	if(Projswitch==true){xSize=ySize=1400;}else{xSize=1400;ySize=400;}
+	TCanvas *c1= new TCanvas("c1","",xSize,ySize);
 	/////////////////////////////////////////////////////////////////////////////
 	// ** File input ** //
-	inputTree1 ="/home/kris/Desktop/TrackTreeTime.root";  //<<<--- Change
-	f1 = TFile::Open(inputTree1.c_str());
 
-	inputTree2 ="/home/kris/Desktop/TrackTree_2022-04-12T08:03:44.531_0000.root";
-	f2 = TFile::Open(inputTree2.c_str());
 
-	// ** Error managment ** //
+	TFile *f1;
+	if(TimeOrMm == 0){
+		f1 = TFile::Open(inputDirecTime.c_str());
+	}else if(TimeOrMm==1){
+		f1 = TFile::Open(inputDirecMm.c_str());
+	}else{
+		cout<<RED<<"Invalid 'TimeOrDistance' option"<<endl;
+		cout<<"For distance in time bins, set = 0"<<endl;
+		cout<<"For Distance in mm, set = 1"<<RESET<<RESET<<endl;
+		return -1;
+	}
+
 	cout<<endl<<"************"<<endl;
-	if(f1!=0) cout<<"File 1 opened succesfully"<<endl;
-	if(f1==0) cout<<"File 1 Failed opening"<<endl;		
-	if(f2!=0) cout<<"File 2 opened succesfully"<<endl;
-	if(f2==0) cout<<"File 2 Failed opening"<<endl;
+	if(f1!=0) cout<<GREEN<<"File opened succesfully"<<RESET<<endl;
+	if(f1==0) cout<<RED<<"File Failed opening"<<RESET<<endl;	
 	cout<<"************"<<endl<<endl;
 
 
 	/////////////////////////////////////////////////////////////////////////////
 	// ** main loop** //
 	for(int evt =2 ;evt<nEntries;evt++){
+		cout<<"Event "<<evt<<endl;
 
 
+		if(TimeOrMm == 0){
+			U = "hraw_U_vs_time_evt"+to_string(evt)+";1";	//<<<------------ Check
+			V = "hraw_V_vs_time_evt"+to_string(evt)+";1";	
+			W = "hraw_W_vs_time_evt"+to_string(evt)+";1";
+			HistTitle = "ELITPC Tracks: Raw Strips Vs Time";
+		}else if(TimeOrMm==1){	
+			U = "hraw_U_vs_time_mm_evt"+to_string(evt)+";1";	//<<<------------ Check 
+			V = "hraw_V_vs_time_mm_evt"+to_string(evt)+";1";
+			W = "hraw_W_vs_time_mm_evt"+to_string(evt)+";1";
+			HistTitle = "ELITPC Tracks: Raw Strips Vs mm";	
+		}else{cout<<"ERROR"<<endl;return -1;}
 
-
-
-		///////////////////////////////////////////////////////////////////////////
-		// ** Fetch TH2s - Time** //
-		if(view_time == true){
-			U_Time = "hraw_U_vs_time_evt"+to_string(evt)+";1";	//<<<------------ Check
-			V_Time = "hraw_V_vs_time_evt"+to_string(evt)+";1";	
-			W_Time = "hraw_W_vs_time_evt"+to_string(evt)+";1";	
-
-			f1->GetObject(U_Time.c_str(),UHist_Time);
-			f1->GetObject(V_Time.c_str(),VHist_Time);
-			f1->GetObject(W_Time.c_str(),WHist_Time);
-		}
-
-		// ** Fetch TH2s - mm ** //
-
-		if(view_mm == true){
-			U_mm = "hraw_U_vs_time_mm_evt"+to_string(evt)+";1";	//<<<------------ Check 
-			V_mm = "hraw_V_vs_time_mm_evt"+to_string(evt)+";1";
-			W_mm = "hraw_W_vs_time_mm_evt"+to_string(evt)+";1";	
-
-			f2->GetObject(U_mm.c_str(),UHist_mm);
-			f2->GetObject(V_mm.c_str(),VHist_mm);
-			f2->GetObject(W_mm.c_str(),WHist_mm);
-		}
-
-		///////////////////////////////////////////////////////////////////////////
-		// ** Analysis** //
-		if(analysis_time == true){
-			Threshold(UHist_Time);
-			Threshold(VHist_Time);
-			Threshold(WHist_Time);
-		}
-
-		if(analysis_mm == true){
-			Threshold(UHist_mm);
-			Threshold(VHist_mm);
-			Threshold(WHist_mm);
-		}
-
+		f1->GetObject(U.c_str(),UHist);
+		f1->GetObject(V.c_str(),VHist);
+		f1->GetObject(W.c_str(),WHist);
 
 
 		///////////////////////////////////////////////////////////////////////////
-		// ** Plotting - Time ** //
-
-		if(view_time == true){
-
-
-			c1 = new TCanvas("c1","ELITPC Tracks: Raw Strips Vs Time",1400,410);
-			c1->Divide(3,1);
-			c1->SetWindowPosition(1,1);
-			draw(UHist_Time,c1,1);
-			draw(VHist_Time,c1,2);
-			draw(WHist_Time,c1,3);
-			processImg(c1);
-
-			// ** projections - time ** //
-			if(projSwitch_time==true){
-				c11 = new TCanvas("c11","Time U proj",450,550);
-				c12 = new TCanvas("c12","Time V proj",450,550);
-				c13 = new TCanvas("c13","Time W proj",450,550);
-				c11->SetWindowPosition(1,480);
-				c12->SetWindowPosition(550,480);
-				c13->SetWindowPosition(1030,480);
-				c11->Divide(1,2);
-				c12->Divide(1,2);
-				c13->Divide(1,2);
-
-				UXt = proj(UHist_Time,0); title = "Strip U X Proj";;
-				draw(c11,1,title,UXt);
-				UYt	= proj(UHist_Time,1); title = "Strip U Y Proj" ;
-				draw(c11,2,title,UYt);
-				processImg(c11);
-
-				VXt = proj(VHist_Time,0); title = "Strip V X Proj";;
-				draw(c12,1,title,VXt);
-				VYt	= proj(VHist_Time,1); title = "Strip V Y Proj" ;
-				draw(c12,2,title,VYt);
-				processImg(c12);
-
-				WXt = proj(WHist_Time,0); title = "Strip W X Proj";;
-				draw(c13,1,title,WXt);
-				WYt	= proj(WHist_Time,1); title = "Strip W Y Proj" ;
-				draw(c13,2,title,WYt);
-				processImg(c13);
-
-			}
-
-
-
+		// ** Analysis ** //
+		if(Thresh == true){
+			Threshold(UHist);
+			Threshold(VHist);
+			Threshold(WHist);
 		}
 
-		// ** Plotting - mm ** //
-		if(view_mm == true){
-			cout<<"Event "<<evt<<endl;
+
+		///////////////////////////////////////////////////////////////////////////
+		// ** Projections ** //
+
+		if(Projswitch==true){
+
+
+			TH1D *UX, *UY,*VX,*VY,*WX,*WY;
 			std::tuple<double,double,double> lenUX, lenUY, lenVX, lenVY, lenWX, lenWY;
 			double length, xMin, XMax;
 			double Y[2]={0.1,0.1};
 
+			c1->Divide(3,3);
+
+			// ** U Strips ** //
+			//x 
+			UX = proj(UHist,0);
+			title = "Strip U X Proj";;
+			lenUX = trackProjInfo(UX,1,1); 
+			length = get<0>(lenUX); 
+			cout<<"Len U xproj = "<<length<<" mm"<<endl;
+			double X1[2]={get<1>(lenUX),get<2>(lenUX)};
+			endpointsProj1 = new TGraph(2,X1,Y);
+			drawX(c1,4,title,UX,endpointsProj1); 
+
+			//y
+			UY= proj(UHist,1);
+			title = "Strip U Y Proj" ;
+			lenUY = trackProjInfo(UY,1,1); 
+			length = get<0>(lenUY);
+			cout<<"Len U yproj = "<<length<<" mm"<<endl<<endl;
+			double X2[2]={get<1>(lenUY),get<2>(lenUY)};
+			endpointsProj2 = new TGraph(2,X2,Y);
+			drawY(c1,7,title,UY,endpointsProj2);
+
+			// ** V Strips** //
+			// x
+			VX = proj(VHist,0);
+			title = "Strip V X Proj";
+			lenVX = trackProjInfo(VX,1,1);
+			length = get<0>(lenVX);
+			cout<<"Len V Xproj = "<<length<<" mm"<<endl;
+			double X3[2]={get<1>(lenVX),get<2>(lenVX)};
+			endpointsProj3 = new TGraph(2,X3,Y);
+			drawX(c1,5,title,VX,endpointsProj3);
+			//y
+			VY= proj(VHist,1); 
+			title = "Strip V Y Proj" ;
+			lenVY = trackProjInfo(VY,1,1);
+			length = get<0>(lenVY);
+			cout<<"Len V Yproj = "<<length<<" mm"<<endl<<endl;
+			double X4[2]={get<1>(lenVY),get<2>(lenVY)};
+			endpointsProj4 = new TGraph(2,X4,Y);
+			drawY(c1,8,title,VY,endpointsProj4);
+
+			// ** W Strips ** //
+			// x
+			WX = proj(WHist,0);
+			title = "Strip W X Proj";
+			lenWX = trackProjInfo(WX,1,1);
+			length = get<0>(lenWX); 
+			cout<<"Len W Xproj = "<<length<< " mm"<<endl;
+			double X5[2]={get<1>(lenWX),get<2>(lenWX)};
+			endpointsProj5 = new TGraph(2,X5,Y);
+			drawX(c1,6,title,WX,endpointsProj5);
+			//x
+			WY= proj(WHist,1);
+			title = "Strip W Y Proj" ;
+			lenWY = trackProjInfo(WY,1,1);
+			length = get<0>(lenWY); 
+			cout<<"Len W YProj = "<<length<<" mm"<<endl<<endl;
+			double X6[2]={get<1>(lenWY),get<2>(lenWY)};
+			endpointsProj6 = new TGraph(2,X6,Y);
+			drawY(c1,9,title,WY,endpointsProj6);
 
 
-			// ** projections - mm ** //
-			if(projSwitch_mm==true){
-				c21 = new TCanvas("c21","mm U proj",470,1000);
-				c22 = new TCanvas("c22","mm V proj",470,1000);
-				c23 = new TCanvas("c23","mm W proj",470,1000);
-				c21->SetWindowPosition(1,1);
-				c22->SetWindowPosition(550,1);
-				c23->SetWindowPosition(1030,1);
-				c21->Divide(1,3);
-				c22->Divide(1,3);
-				c23->Divide(1,3);
+			draw(UHist,c1,1);
+			draw(VHist,c1,2);
+			draw(WHist,c1,3);
+			processImg(c1);
 
 
+		}else if(Projswitch==false)
+		{
 
-				// ** U Strips ** //
-				//x 
-				UXmm = proj(UHist_mm,0); title = "Strip U X Proj";;
-				lenUX = 	trackProjInfo(UXmm,1,1); 
-				length = get<0>(lenUX); cout<<"Len U xproj = "<<length<<" mm"<<endl;
-				double X1[2]={get<1>(lenUX),get<2>(lenUX)};
-				endpointsProj1 = new TGraph(2,X1,Y);
-				drawX(c21,2,title,UXmm,endpointsProj1); 
-				//y
-				UYmm	= proj(UHist_mm,1); title = "Strip U Y Proj" ;
-				lenUY = 	trackProjInfo(UYmm,1,1); 
-				length = get<0>(lenUY); cout<<"Len U yproj = "<<length<<" mm"<<endl<<endl;
-				double X2[2]={get<1>(lenUY),get<2>(lenUY)};
-				endpointsProj2 = new TGraph(2,X2,Y);
-				drawY(c21,3,title,UYmm,endpointsProj2);
-
-				// ** V Strips** //
-				// x
-				VXmm = proj(VHist_mm,0); title = "Strip V X Proj";;
-				lenVX = 	trackProjInfo(VXmm,1,1);
-				length = get<0>(lenVX); cout<<"Len V Xproj = "<<length<<" mm"<<endl;
-				double X3[2]={get<1>(lenVX),get<2>(lenVX)};
-				endpointsProj3 = new TGraph(2,X3,Y);
-				drawX(c22,2,title,VXmm,endpointsProj3);
-				//y
-				VYmm	= proj(VHist_mm,1); title = "Strip V Y Proj" ;
-				lenVY = 	trackProjInfo(VYmm,1,1);
-				length = get<0>(lenVY); cout<<"Len V Yproj = "<<length<<" mm"<<endl<<endl;
-				double X4[2]={get<1>(lenVY),get<2>(lenVY)};
-				endpointsProj4 = new TGraph(2,X4,Y);
-				drawY(c22,3,title,VYmm,endpointsProj4);
-
-				// ** W Strips ** //
-				// x
-				WXmm = proj(WHist_mm,0); title = "Strip W X Proj";;
-				lenWX = 	trackProjInfo(WXmm,1,1);
-				length = get<0>(lenWX); cout<<"Len W Xproj = "<<length<< " mm"<<endl;
-				double X5[2]={get<1>(lenWX),get<2>(lenWX)};
-				endpointsProj5 = new TGraph(2,X5,Y);
-				drawX(c23,2,title,WXmm,endpointsProj5);
-				//x
-				WYmm	= proj(WHist_mm,1); title = "Strip W Y Proj" ;
-				lenWY = 	trackProjInfo(WYmm,1,1);
-				length = get<0>(lenWY); cout<<"Len W YProj = "<<length<<" mm"<<endl<<endl;
-				double X6[2]={get<1>(lenWY),get<2>(lenWY)};
-				endpointsProj6 = new TGraph(2,X6,Y);
-				drawY(c23,3,title,WYmm,endpointsProj6);
-
-
-
-				processImg(c21);
-				processImg(c22);
-				processImg(c23);
-			}
-
-			// ** RANSAC ** //
-			int sampSize=40;
-			int itter=1000;
-			double thresh=40;
-
-			//TF1 lineU = Ransac(UHist_mm,sampSize,itter,thresh);
-			//TF1 lineV = Ransac(UHist_mm,sampSize,itter,thresh);
-			//TF1 lineW = Ransac(UHist_mm,sampSize,itter,thresh);
-
-			// ** Plotting main** //
-			//c2a = new TCanvas("c2a","ELITPC Tracks: U Raw Strips Vs mm",450,450);
-			//c2b = new TCanvas("c2b","ELITPC Tracks: V Raw Strips Vs mm",450,450);
-			//c2c = new TCanvas("c2c","ELITPC Tracks: W Raw Strips Vs mm",450,450);
-			//c2->Divide(3,1);
-			//c2a->SetWindowPosition(1,1);
-			//c2a->SetWindowPosition(600,1);
-			//c2a->SetWindowPosition(1130,1);
-			draw(UHist_mm,c21,1,endpointsProj1,endpointsProj2);
-			processImg(c21);
-			draw(VHist_mm,c22,1,endpointsProj3,endpointsProj4);
-			processImg(c22);
-			draw(WHist_mm,c23,1,endpointsProj5,endpointsProj6);
-			processImg(c23);
-			//ransacDraw(c2,lineU,lineV,lineW);
-
-
-
+			c1->Divide(3,1);
+			c1->SetWindowPosition(1,1);
+			c1->SetTitle(HistTitle.c_str());
+			draw(UHist,c1,1);
+			draw(VHist,c1,2);
+			draw(WHist,c1,3);
+			processImg(c1);
 		}
 
 
@@ -261,32 +210,28 @@ void TH2Viewer(){
 		cout<<"************"<<endl;
 		cout<<"Step forward? y/n"<<endl;
 		cin>>stepfwd;
-		if(stepfwd=='n') return;
+		if(stepfwd=='n'){delete c1;f1->Close(); return 0;}	
 
 
 
 		///////////////////////////////////////////////////////////////////////////
-		// ** Clean up pointers! ** //
-		if(c1)delete c1;
-		if(c2a)delete c2a;
-		if(c2b)delete c2b;
-		if(c2c)delete c2c;				
-		if(c11)delete c11;
-		if(c12)delete c12;
-		if(c13)delete c13;
-		if(c21)delete c21;
-		if(c22)delete c22;
-		if(c23)delete c23;
-		if(endpointsProj1)delete endpointsProj1;
-		if(endpointsProj2)delete endpointsProj2;
-		if(endpointsProj3)delete endpointsProj3;
-		if(endpointsProj4)delete endpointsProj4;
-		if(endpointsProj5)delete endpointsProj5;
-		if(endpointsProj6)delete endpointsProj6;
+		// ** Clean up ** //
+		c1->Clear();
 
-
-	}
-
+		delete endpointsProj1;
+		delete endpointsProj2;	
+		delete endpointsProj3;	
+		delete endpointsProj4;	
+		delete endpointsProj5;	
+		delete endpointsProj6;		
 
 
 }
+
+delete c1;
+f1->Close();
+
+
+return 0;
+}
+
